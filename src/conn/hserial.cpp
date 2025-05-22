@@ -63,16 +63,14 @@ void uartLoop(void *param) {
                 
                 if (msg == String("LOCK\r")) {
                     Serial.println("LOCK");
-                    setTargetAReached(false);
-                    setTargetBReached(false);
-                    setTargetPos(3);
+                    setStateLockA(true);
+                    setStateLockB(true);
                 }
                 
                 if (msg == String("UNLOCK\r")) {
                     Serial.println("UNLOCK");
-                    setTargetAReached(false);
-                    setTargetBReached(false);
-                    setTargetPos(1);                    
+                    setStateLockA(false);
+                    setStateLockB(false);
                 }
                 
                 if (msg == String("SHOW_DISPLAY_TRUE\r")) {
