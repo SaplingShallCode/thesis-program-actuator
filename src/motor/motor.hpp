@@ -24,9 +24,12 @@ void setupMotorPins(void);
 void moveForward(void *);
 void moveBackward(void *);
 void stopMotor(void);
-void setTargetPos(uint8_t);
 void setTargetAReached(bool);
 void setTargetBReached(bool);
+void setStateLockA(bool b);
+bool getStateLockA();
+void setStateLockB(bool b);
+bool getStateLockB();
 void motorEvent(void *);
 
 #endif

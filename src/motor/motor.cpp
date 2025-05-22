@@ -1,12 +1,14 @@
 #include <Arduino.h>
 #include "motor.hpp"
-#include "tof/tof.hpp"
+#include "prox/prox.hpp"
+// #include "tof/tof.hpp"
 
 #define MOTOR_TIME_MS 1000
 
 static bool targetAReached = false;
 static bool targetBReached = false;
-static uint8_t targetPosition = 1;
+static bool stateLockA  = false;
+static bool stateLockB  = false;
 
 void setupMotorPins(void) {
     Serial.println("setupMotorPins");
@@ -91,7 +93,7 @@ static void doRetract(char rack) {
         case 'B':
         digitalWrite(PWM_B, 255);
         digitalWrite(B_IN1, HIGH);
-        digitalWrite(B_IN2, LOW);
+        digitalWrite(B_IN2, LOW); 
         break;
     }
 }
@@ -134,19 +136,30 @@ static void doPause(char rack) {
     }
 }
 
-
-void setTargetPos(uint8_t newTarget) {
-    targetPosition = newTarget;
-}
-
-
+[[deprecated("Implementation not used.")]]
 void setTargetAReached(bool b) {
     targetAReached = b;
 }
 
-
+[[deprecated("Implementation not used.")]]
 void setTargetBReached(bool b) {
     targetBReached = b;
+}
+
+void setStateLockA(bool b) {
+    stateLockA = b;
+}
+
+bool getStateLockA() {
+    return stateLockA;
+}
+
+void setStateLockB(bool b) {
+    stateLockB = b;
+}
+
+bool getStateLockB() {
+    return stateLockB;
 }
 
 
@@ -157,59 +170,37 @@ void motorEvent(void * param) {
 
     for (;;) {
 
-        if (targetAReached && rackAPosTracker != targetPosition) {
-            targetAReached = false;
-        }
-
-        if (targetBReached && rackBPosTracker != targetPosition) {
-            targetBReached = false;
-        }
-
-
-
-        if (rackAPosTracker < targetPosition) {
-            // Extend only if target is not reached, Otherwise trigger alarm
-            
-            if (!targetAReached) {
+        /// Motor A
+        if (stateLockA) {
+            if (getProxAState()) {
                 doExtend('A');
-            } else {
-
             }
-
+            else {
+                doPause('A');
+            }
         }
-        else if (rackAPosTracker > targetPosition) {
-            // Retract only if target is not reached, Otherwise trigger alarm
-            if (!targetAReached) {
+        else {
+            if (!getProxAState()) {
                 doRetract('A');
-            } else {
-
+                vTaskDelay(3000 / portTICK_PERIOD_MS);
             }
         }
-        else if (rackAPosTracker == targetPosition) {
-            // Destination reached, Pause motors
-            targetAReached = true;
-            doPause('A');
-        }
-
-        // ====================== RACK B
-        if (rackBPosTracker < targetPosition) {
-            if (!targetBReached) {
+        
+        
+        /// Motor B
+        if (stateLockB) {
+            if (getProxBState()) {
                 doExtend('B');
-            } else {
-
             }
-
+            else {
+                doPause('B');
+            }
         }
-        else if (rackBPosTracker > targetPosition) {
-            if (!targetBReached) {
+        else {
+            if (!getProxBState()) {
                 doRetract('B');
-            } else {
-
+                vTaskDelay(3000 / portTICK_PERIOD_MS);
             }
-        }
-        else if (rackBPosTracker == targetPosition) {
-            targetBReached = true;
-            doPause('B');
         }
     }
 }
