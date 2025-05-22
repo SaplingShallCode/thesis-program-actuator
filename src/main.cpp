@@ -13,7 +13,8 @@
 #include "motor/motor.hpp"
 #include "oled/oled.hpp"
 #include "alarm/alarm.hpp"
-#include "tof/tof.hpp"
+// #include "tof/tof.hpp"
+#include "prox/prox.hpp"
 
 #define SSER_TX 11
 #define SSER_RX 12
@@ -42,7 +43,8 @@ void setup(void) {
     setupHardwareSerial();
     showFeedback(1000, true);
     
-    setupTof();
+    // setupTof();
+    setupProx();
     setupMotorPins();
     setupOLED();
     setupAlarmPin();
@@ -57,13 +59,26 @@ void setup(void) {
         1
     );
 
+
+    // +++++ To remove, part of v2, TOF Sensor +++++ //
+    // xTaskCreatePinnedToCore(
+    //     tofLoop,
+    //     "tofLoop",
+    //     4000,
+    //     NULL,
+    //     1,
+    //     NULL,
+    //     1
+    // );
+
+
     xTaskCreatePinnedToCore(
-        tofLoop,
-        "tofLoop",
+        proxLoop,
+        "proxLoop",
         4000,
-        NULL,
+        NULL, 
         1,
-        NULL,
+        NULL, 
         1
     );
 
