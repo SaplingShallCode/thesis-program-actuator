@@ -1,12 +1,14 @@
 #include <Arduino.h>
 #include "motor.hpp"
 #include "prox/prox.hpp"
-// #include "tof/tof.hpp"
+#include "alarm/alarm.hpp"
 
 #define MOTOR_TIME_MS 1000
 
 static bool targetAReached = false;
 static bool targetBReached = false;
+static bool rodAtA = false;
+static bool rodAtB = false;
 static bool stateLockA  = false;
 static bool stateLockB  = false;
 static bool motorRunning = false;
@@ -145,6 +147,22 @@ void setTargetBReached(bool b) {
     targetBReached = b;
 }
 
+void setRodAtA(bool b) {
+    rodAtA = b;
+}
+
+bool getRodAtA(void) {
+    return rodAtA;
+}
+
+void setRodAtB(bool b) {
+    rodAtB = b;
+}
+
+bool getRodAtB(void) {
+    return rodAtB;
+}
+
 void setStateLockA(bool b) {
     stateLockA = b;
 }
@@ -174,10 +192,19 @@ void motorEvent(void * param) {
             if (getProxAState()) {
                 doExtend('A');
                 setTargetAReached(false);
+
+                if (getRodAtA()) {
+                    forceAlarm();
+                }
+                else {
+                    turnOffAlarm();
+                }
+
             }
             else {
                 doPause('A');
                 setTargetAReached(true);
+                setRodAtA(true);
             }
         }
         else {
@@ -193,13 +220,23 @@ void motorEvent(void * param) {
             if (getProxBState()) {
                 if (targetAReached) {
                     doExtend('B');
+                    
+                    if (getRodAtB()) {
+                        forceAlarm();
+                    }
+                    else {
+                        turnOffAlarm();
+                    }
                 }
                 else {
                     doPause('B');
                 }
+                setTargetBReached(false);
             }
             else {
                 doPause('B');
+                setTargetBReached(true);
+                setRodAtB(true);
             }
         }
         else {
