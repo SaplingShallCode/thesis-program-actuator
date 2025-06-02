@@ -23,5 +23,5 @@ int getProxAState(void) {
 }
 
 int getProxBState(void) {
-    return proxAState;
+    return proxBState;
 }
