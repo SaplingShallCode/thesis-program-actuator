@@ -71,6 +71,8 @@ void uartLoop(void *param) {
                     Serial.println("UNLOCK");
                     setStateLockA(false);
                     setStateLockB(false);
+                    setRodAtA(false);
+                    setRodAtB(false);
                 }
                 
                 if (msg == String("SHOW_DISPLAY_TRUE\r")) {
