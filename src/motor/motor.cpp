@@ -9,6 +9,7 @@ static bool targetAReached = false;
 static bool targetBReached = false;
 static bool stateLockA  = false;
 static bool stateLockB  = false;
+static bool motorRunning = false;
 
 void setupMotorPins(void) {
     Serial.println("setupMotorPins");
@@ -136,12 +137,10 @@ static void doPause(char rack) {
     }
 }
 
-[[deprecated("Implementation not used.")]]
 void setTargetAReached(bool b) {
     targetAReached = b;
 }
 
-[[deprecated("Implementation not used.")]]
 void setTargetBReached(bool b) {
     targetBReached = b;
 }
@@ -174,9 +173,11 @@ void motorEvent(void * param) {
         if (stateLockA) {
             if (getProxAState()) {
                 doExtend('A');
+                setTargetAReached(false);
             }
             else {
                 doPause('A');
+                setTargetAReached(true);
             }
         }
         else {
@@ -190,7 +191,12 @@ void motorEvent(void * param) {
         /// Motor B
         if (stateLockB) {
             if (getProxBState()) {
-                doExtend('B');
+                if (targetAReached) {
+                    doExtend('B');
+                }
+                else {
+                    doPause('B');
+                }
             }
             else {
                 doPause('B');
