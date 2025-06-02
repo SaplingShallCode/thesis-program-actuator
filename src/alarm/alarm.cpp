@@ -14,6 +14,10 @@ void setOffAlarm(void) {
     turnOffAlarm();
 }
 
+void forceAlarm(void) {
+    digitalWrite(ALARM_PIN, HIGH);
+}
+
 void turnOffAlarm(void) {
     digitalWrite(ALARM_PIN, LOW);
 }

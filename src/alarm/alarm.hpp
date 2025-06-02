@@ -8,6 +8,7 @@
 
 void setupAlarmPin(void);
 void setOffAlarm(void);
+void forceAlarm(void);
 void turnOffAlarm(void);
 
 #endif
